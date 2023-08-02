@@ -3,6 +3,11 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 var routes = require('./routes/routes');
+const cors = require('cors');
+
+app.use(cors({
+    origin: "http://localhost:4200"
+}));
 
 //start server
 app.listen(4000, function check(error){

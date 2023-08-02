@@ -1,4 +1,4 @@
-var userModel =require('./userModel');
+var userModel = require('./userModel');
 var key = 'mystudentsaretalented';
 var encryptor = require('simple-encryptor')(key);
 
@@ -7,15 +7,13 @@ module.exports.saveUserInfoService = (userDetails) => {
         var userModelData = new userModel();
         userModelData.username = userDetails.username;
         userModelData.email = userDetails.email;
-        userModelData.password = userDetails.password;
+        //Code to encrypt password
+        var encryptedPassword = encryptor.encrypt(userDetails.password);
+        userModelData.password = encryptedPassword;
 
-        //code to encrypt password
-        var encryptedPassword = encryptor.encrypt(userDetails.password);  //encryption
-        userModelData.password = encryptedPassword; //save the password to the variable
-
-        userModelData.save( function resultHandle(error, result){
+        userModelData.save(function resultHandle(error, result){
             if(error){
-                reject(true);
+                reject(false);
             }else{
                 resolve(true);
             }
@@ -25,21 +23,21 @@ module.exports.saveUserInfoService = (userDetails) => {
 
 module.exports.userLoginService = (userLoginDetails) => {
     return new Promise(function userLoginFunctionality(resolve, reject){
-        userModel.findOne({email:userLoginDetails.email}, function getLoginResult(error,result){
-        if(error){
-            reject({status: false, message: "Invalid Data"});
-        }else{
-            if(result != undefined && result !=null){
-                var decryptedPassword = encryptor.decrypt(result.password);
-                if(decryptedPassword == userLoginDetails.password){
-                    resolve({status: true, message: "User validated Successfally"})
-                }else{
-                    reject({status: false, message: "User validation failed"});
-                }
+        userModel.findOne({email: userLoginDetails.email}, function getLoginResult(error, result){
+            if(error){
+                reject({status: false, message: "Invalid Data"});
             }else{
-                reject({status: false, message: "Error in User Information"});
+                if(result != undefined && result != null){
+                    var decryptedPassword = encryptor.decrypt(result.password);
+                    if(decryptedPassword == userLoginDetails.password){
+                        resolve({status: true, message: "User validated Successfully"});
+                    }else{
+                        reject({status: false, message: "User validation failed"});    
+                    }
+                }else{
+                    reject({status: false, message: "Error in User Information"});
+                }
             }
-        }
         });
     });
 }
